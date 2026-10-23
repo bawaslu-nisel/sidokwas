@@ -1,5 +1,5 @@
-/* Service worker SIDOKWAS Luring: menyimpan halaman agar tetap terbuka tanpa sinyal. */
-const CACHE = "sidokwas-luring-v1";
+/* Service worker SIMAPAN Luring: menyimpan halaman agar tetap terbuka tanpa sinyal. */
+const CACHE = "simapan-luring-v3";
 const ISI = ["./", "./index.html", "./manifest.webmanifest"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ISI)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(k => Promise.all(k.filter(x => x !== CACHE).map(x => caches.delete(x)))).then(() => self.clients.claim())); });

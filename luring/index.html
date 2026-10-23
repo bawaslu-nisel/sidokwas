@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>SIDOKWAS Luring</title>
+<title>SIMAPAN Luring</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#1D5C57">
+<meta name="theme-color" content="#0B1426">
 <style>
-:root{--paper:#F2F4F2;--surface:#fff;--sunk:#E8ECE9;--ink:#15212A;--muted:#566770;--line:#D3DBD7;--accent:#9B2527;--teal:#1D5C57;--ok:#23704A;--warn:#A5660C;--crit:#B3261E;color-scheme:light}
-@media (prefers-color-scheme:dark){:root{--paper:#0E1517;--surface:#162125;--sunk:#1C2A2F;--ink:#E4EBE9;--muted:#96A7AA;--line:#2A3A3F;--accent:#E06A6C;--teal:#63B5AA;--ok:#5DC08C;--warn:#E3A546;--crit:#F0746B;color-scheme:dark}}
+:root{--paper:#F3F6FA;--surface:#fff;--sunk:#E7EEF7;--ink:#13202C;--muted:#55687C;--line:#D3DEEA;--accent:#0A6FAE;--accent-ink:#fff;--teal:#123C6E;--teal-ink:#fff;--bar:#123C6E;--bar-ink:#fff;--ok:#23704A;--warn:#A5660C;--crit:#B3261E;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--paper:#070E1C;--surface:#0E1A2E;--sunk:#13243C;--ink:#E3EDF8;--muted:#92A6C0;--line:#22354F;--accent:#38BDF8;--accent-ink:#06202F;--teal:#5FB4F2;--teal-ink:#06202F;--bar:#0E1A2E;--bar-ink:#E3EDF8;--ok:#5DC08C;--warn:#E3A546;--crit:#F0746B;color-scheme:dark}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:0 0 env(safe-area-inset-bottom,0px)}
-header{background:var(--teal);color:#fff;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 14px}
+header{background:var(--bar);color:var(--bar-ink);padding:calc(14px + env(safe-area-inset-top,0px)) 16px 14px}
 header b{font-size:19px;display:block;letter-spacing:.01em}
 header span{font-size:12.5px;opacity:.9}
 main{padding:16px;max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
@@ -22,8 +22,8 @@ input,select,textarea,button{font:inherit;color:inherit}
 input,select,textarea{padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);font-size:15px}
 textarea{min-height:64px;resize:vertical}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--surface);padding:10px 14px;border-radius:9px;font-weight:600;font-size:15px;cursor:pointer}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;width:100%}
-.btn.teal{background:var(--teal);border-color:var(--teal);color:#fff}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);width:100%}
+.btn.teal{background:var(--teal);border-color:var(--teal);color:var(--teal-ink)}
 .btn.sm{padding:5px 10px;font-size:13px;font-weight:500}
 .status{display:flex;align-items:center;gap:8px;font-size:13px;padding:8px 12px;border-radius:9px;background:var(--sunk);color:var(--muted)}
 .dot{width:9px;height:9px;border-radius:50%;background:var(--muted)}
@@ -40,7 +40,7 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted);font-weight:600
 </style>
 </head>
 <body>
-<header><b>SIDOKWAS · Input Luring</b><span>Pengawasan Pemilu — Bawaslu Kab. Nias Selatan</span></header>
+<header><b>SIMAPAN · Input Luring</b><span>Pengawasan Pemilu — Bawaslu Kab. Nias Selatan</span></header>
 <main>
   <div class="status" id="status"><span class="dot"></span><span id="statusTeks">Memeriksa sambungan…</span></div>
 
@@ -60,7 +60,7 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted);font-weight:600
     <p class="muted" id="namaBerkas" style="margin:-4px 0 10px;font-size:12.5px"></p>
     <img class="pratinjau" id="pratinjau" hidden alt="Pratinjau lampiran">
     <button class="btn primary" type="submit">Simpan catatan</button>
-    <p class="muted" style="margin:10px 0 0">Catatan disimpan di HP ini dulu, lalu terkirim sendiri ke SIDOKWAS begitu ada sinyal.</p>
+    <p class="muted" style="margin:10px 0 0">Catatan disimpan di HP ini dulu, lalu terkirim sendiri ke SIMAPAN begitu ada sinyal.</p>
   </form>
 
   <div class="card">
@@ -71,7 +71,7 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted);font-weight:600
 
   <details class="card">
     <summary>Pengaturan sambungan</summary>
-    <p class="muted">Diisi sekali oleh Tim Teknis Aplikasi. Minta alamat dan token kepada Admin SIDOKWAS.</p>
+    <p class="muted">Diisi sekali oleh Tim Teknis Aplikasi. Minta alamat dan token kepada Admin SIMAPAN.</p>
     <label>Alamat web app (…/exec) <input id="url" type="url" placeholder="https://script.google.com/macros/s/.../exec"></label>
     <label>Token <input id="token" placeholder="token dari Admin"></label>
     <label>Email Anda <input id="email" type="email" placeholder="nama@contoh.id"></label>
@@ -96,6 +96,10 @@ const kec = bacaLokal("kec", ""); if (kec) $("#Kecamatan").value = kec;
 $("#simpanSet").onclick = e => { e.preventDefault(); simpanLokal("set", { url: $("#url").value.trim(), token: $("#token").value.trim(), email: $("#email").value.trim() }); pesan("Pengaturan disimpan."); };
 
 let antre = bacaLokal("antre", []);
+/* Kiriman yang berstatus "proses" berarti aplikasi tertutup di tengah pengiriman.
+   Statusnya dipulihkan menjadi "antre" agar ikut dicoba lagi, tidak tertinggal selamanya. */
+antre.forEach(a => { if (a.status === "proses") a.status = "antre"; });
+simpanLokal("antre", antre);
 let foto = null;
 const BATAS_PDF = 2 * 1024 * 1024;
 const ukuranTeks = n => { n = +n || 0; return n < 1048576 ? Math.max(1, Math.round(n / 1024)) + " KB" : (n / 1048576).toFixed(1) + " MB"; };
@@ -152,7 +156,7 @@ $("#frm").onsubmit = e => {
   antre.push({ id: Date.now(), jejak: jejakBaru(), data: d, status: "antre", pesan: "" });
   simpanLokal("antre", antre); simpanLokal("kec", d.Kecamatan);
   $("#Uraian").value = ""; $("#No_Dokumen").value = ""; $("#Foto").value = ""; $("#pratinjau").hidden = true; $("#namaBerkas").textContent = ""; foto = null;
-  gambar(); pesan("Catatan masuk antrean."); kirimSemua();
+  gambar(); pesan("Catatan masuk antrean."); kirimNanti(5);
 };
 function gambar() {
   $("#jml").textContent = antre.length;
@@ -162,39 +166,95 @@ function gambar() {
     <span class="tag ${a.status}">${a.status === "antre" ? "menunggu" : a.status === "proses" ? "mengirim…" : a.status === "kirim" ? "terkirim" : "gagal"}</span></div>`).join("")
     : `<p class="muted">Belum ada catatan dalam antrean.</p>`;
 }
-function pesan(t) { const s = $("#statusTeks"); const lama = s.textContent; s.textContent = t; setTimeout(() => sambungan(), 2200); }
+function pesan(t) { $("#statusTeks").textContent = t; setTimeout(() => sambungan(), 2200); }
 function sambungan() {
   const st = $("#status"), ada = navigator.onLine, sisa = antre.filter(a => a.status !== "kirim").length;
   st.className = "status " + (ada ? "on" : "off");
-  $("#statusTeks").textContent = ada ? (sisa ? sisa + " catatan menunggu dikirim" : "Tersambung. Semua catatan sudah terkirim.") : "Tanpa sinyal — catatan disimpan di HP ini.";
+  const jeda = sisaJeda();
+  $("#statusTeks").textContent = !ada ? "Tanpa sinyal \u2014 catatan disimpan di HP ini."
+    : !sisa ? "Tersambung. Semua catatan sudah terkirim."
+    : jeda ? sisa + " catatan menunggu \u2014 terkirim sendiri dalam \u00b1" + jeda + " detik"
+    : sisa + " catatan menunggu dikirim";
 }
 let sedangKirim = false;
+let jadwal = null, jadwalPada = 0;
+const MAKS_COBA = 12;   // setelah ini kiriman berhenti dicoba sendiri; tombol Kirim sekarang tetap bisa
+
+/* Jeda acak sebelum pengiriman otomatis.
+   Bila 35 telepon mendapat sinyal pada saat yang hampir sama (mis. rombongan
+   Panwascam tiba di ibu kota kecamatan), tanpa jeda ini semuanya menembak
+   peladen dalam detik yang sama dan sebagian ditolak karena peladen sibuk.
+   Jeda acak 0 sampai maksDetik menyebar beban itu. */
+function kirimNanti(maksDetik) {
+  if (sedangKirim) return;
+  if (!antre.some(a => a.status !== "kirim")) return;   // tidak ada yang perlu dikirim
+  const pada = Date.now() + Math.floor(Math.random() * maksDetik * 1000);
+  if (jadwal && jadwalPada <= pada) return;   // sudah ada jadwal yang lebih awal
+  if (jadwal) clearTimeout(jadwal);
+  jadwalPada = pada;
+  jadwal = setTimeout(() => { jadwal = null; kirimSemua(); }, Math.max(0, pada - Date.now()));
+}
+function batalkanJadwal() { if (jadwal) { clearTimeout(jadwal); jadwal = null; } }
+const sisaJeda = () => jadwal ? Math.max(1, Math.round((jadwalPada - Date.now()) / 1000)) : 0;
+
 async function kirimSemua() {
   if (sedangKirim) return;                 // cegah dua proses kirim berjalan bersamaan
   const s = bacaLokal("set", {});
   if (!navigator.onLine) return sambungan();
   if (!s.url || !s.token) { pesan("Alamat atau token belum diisi pada Pengaturan."); return; }
   sedangKirim = true;
+  batalkanJadwal();
   try {
   for (const a of antre) {
     if (a.status === "kirim" || a.status === "proses") continue;
+    a.coba = (a.coba || 0) + 1;
     if (!a.jejak) a.jejak = jejakBaru();   // catatan lama yang belum punya jejak
     a.status = "proses";                   // dikunci sebelum menunggu jawaban
     gambar();
     try {
       const res = await fetch(s.url, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ token: s.token, jejak: a.jejak, data: a.data }) });
       const j = await res.json();
-      if (j.ok) { a.status = "kirim"; a.pesan = ""; delete a.data.base64; } else { a.status = "gagal"; a.pesan = j.pesan || "ditolak server"; }
-    } catch (err) { a.status = "gagal"; a.pesan = "gagal terkirim, akan dicoba lagi"; }
+      if (j.ok) { a.status = "kirim"; a.pesan = ""; delete a.data.base64; }
+      else {
+        a.status = "gagal";
+        a.pesan = (j.pesan || "ditolak peladen")
+          + (a.coba < MAKS_COBA ? " \u2014 akan dicoba lagi sendiri (percobaan ke-" + a.coba + ")" : " \u2014 ketuk Kirim sekarang atau laporkan ke Admin");
+      }
+    } catch (err) {
+      a.status = "gagal";
+      a.pesan = a.coba >= MAKS_COBA
+        ? "gagal " + a.coba + " kali — ketuk Kirim sekarang atau laporkan ke Admin"
+        : "gagal terkirim, akan dicoba lagi sendiri (percobaan ke-" + a.coba + ")";
+    }
     simpanLokal("antre", antre);
   }
   } finally { sedangKirim = false; }
   antre = antre.filter(a => a.status !== "kirim" || Date.now() - a.id < 864e5); // simpan riwayat 1 hari
   simpanLokal("antre", antre); gambar(); sambungan();
 }
-$("#kirim").onclick = kirimSemua;
-addEventListener("online", kirimSemua); addEventListener("offline", sambungan);
-gambar(); sambungan(); kirimSemua();
+/* Tombol manual: tanpa jeda, karena pengguna sedang menunggu di depan layar. */
+$("#kirim").onclick = () => { batalkanJadwal(); kirimSemua(); };
+addEventListener("online", () => kirimNanti(30));
+addEventListener("offline", () => { batalkanJadwal(); sambungan(); });
+
+/* Percobaan ulang berkala: kiriman yang gagal dicoba lagi sendiri setiap tiga menit
+   selama aplikasi masih terbuka, tanpa menunggu pengguna menekan tombol. */
+setInterval(() => {
+  if (!navigator.onLine || sedangKirim) return;
+  const sisa = antre.filter(a => a.status !== "kirim" && (a.coba || 0) < MAKS_COBA).length;
+  if (sisa) kirimNanti(45);
+}, 18e4);
+
+/* Halaman dibuka kembali setelah dialihkan ke latar: periksa antrean sekali. */
+addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible" || !navigator.onLine) return;
+  if (Date.now() - dimuatPada < 6000) return;           // jangan mengundi dua kali saat halaman baru dimuat
+  if (antre.some(a => a.status !== "kirim" && (a.coba || 0) < MAKS_COBA)) kirimNanti(20);
+});
+
+const dimuatPada = Date.now();
+gambar(); kirimNanti(30); sambungan();
+setInterval(sambungan, 5000);   // hitungan mundur pada baris status tetap hidup
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 </body>
