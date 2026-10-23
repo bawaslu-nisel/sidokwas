@@ -1,4 +1,4 @@
-var CACHE = 'simapan-v2';
+var CACHE = 'simapan-v6';
 var ISI = ['./index.html', './manifest.json', './ikon-192.png', './ikon-512.png', './ikon-maskable-512.png'];
 
 self.addEventListener('install', function (e) {
