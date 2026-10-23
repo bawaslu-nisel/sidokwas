@@ -1,11 +1,13 @@
 {
   "name": "SIMAPAN Luring",
-  "short_name": "SIMAPAN",
+  "short_name": "Luring SIMAPAN",
   "description": "Input hasil pengawasan tanpa sinyal, terkirim otomatis saat ada jaringan.",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#0B1426",
-  "theme_color": "#0B1426",
+  "orientation": "portrait",
+  "background_color": "#16213E",
+  "theme_color": "#16213E",
   "icons": [
     {
       "src": "ikon.png",
