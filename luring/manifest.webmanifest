@@ -3,6 +3,7 @@
   "short_name": "Luring SIMAPAN",
   "description": "Input hasil pengawasan tanpa sinyal, terkirim otomatis saat ada jaringan.",
   "start_url": "./index.html",
+  "id": "/sidokwas/luring/index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
