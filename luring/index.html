@@ -94,7 +94,22 @@ $("#Tanggal").value = new Date().toISOString().slice(0, 10);
 const set = bacaLokal("set", {});
 ["url", "token", "email"].forEach(k => $("#" + k).value = set[k] || "");
 const kec = bacaLokal("kec", ""); if (kec) $("#Kecamatan").value = kec;
-$("#simpanSet").onclick = e => { e.preventDefault(); simpanLokal("set", { url: $("#url").value.trim(), token: $("#token").value.trim(), email: $("#email").value.trim() }); pesan("Pengaturan disimpan."); };
+$("#simpanSet").onclick = e => {
+  e.preventDefault();
+  simpanLokal("set", { url: $("#url").value.trim(), token: $("#token").value.trim(), email: $("#email").value.trim() });
+  /* Membetulkan pengaturan berarti "coba lagi". Kiriman yang gagal \u2014 termasuk
+     yang ditolak karena kode luring salah \u2014 disetel ulang agar ikut dicoba
+     sendiri, supaya pengguna tidak perlu tahu harus menekan tombol apa pun. */
+  let pulih = 0;
+  antre.forEach(a => {
+    if (a.status === "kirim") return;
+    a.coba = 0; a.pesan = "";
+    if (a.status === "gagal") { a.status = "antre"; pulih++; }
+  });
+  if (pulih) { simpanLokal("antre", antre); gambar(); }
+  pesan(pulih ? "Pengaturan disimpan. " + pulih + " catatan akan dicoba lagi." : "Pengaturan disimpan.");
+  kirimNanti(5);
+};
 
 let antre = bacaLokal("antre", []);
 /* Kiriman yang berstatus "proses" berarti aplikasi tertutup di tengah pengiriman.
@@ -188,7 +203,7 @@ const MAKS_COBA = 12;   // setelah ini kiriman berhenti dicoba sendiri; tombol K
    Jeda acak 0 sampai maksDetik menyebar beban itu. */
 function kirimNanti(maksDetik) {
   if (sedangKirim) return;
-  if (!antre.some(a => a.status !== "kirim")) return;   // tidak ada yang perlu dikirim
+  if (!antre.some(a => a.status !== "kirim" && (a.coba || 0) < MAKS_COBA)) return;   // tidak ada yang masih layak dicoba
   const pada = Date.now() + Math.floor(Math.random() * maksDetik * 1000);
   if (jadwal && jadwalPada <= pada) return;   // sudah ada jadwal yang lebih awal
   if (jadwal) clearTimeout(jadwal);
@@ -198,7 +213,7 @@ function kirimNanti(maksDetik) {
 function batalkanJadwal() { if (jadwal) { clearTimeout(jadwal); jadwal = null; } }
 const sisaJeda = () => jadwal ? Math.max(1, Math.round((jadwalPada - Date.now()) / 1000)) : 0;
 
-async function kirimSemua() {
+async function kirimSemua(manual) {
   if (sedangKirim) return;                 // cegah dua proses kirim berjalan bersamaan
   const s = bacaLokal("set", {});
   if (!navigator.onLine) return sambungan();
@@ -208,6 +223,9 @@ async function kirimSemua() {
   try {
   for (const a of antre) {
     if (a.status === "kirim" || a.status === "proses") continue;
+    /* Kiriman yang sudah menyerah hanya berangkat lagi atas kehendak pengguna:
+       menekan Kirim sekarang, atau membetulkan Pengaturan. */
+    if (!manual && (a.coba || 0) >= MAKS_COBA) continue;
     a.coba = (a.coba || 0) + 1;
     if (!a.jejak) a.jejak = jejakBaru();   // catatan lama yang belum punya jejak
     a.status = "proses";                   // dikunci sebelum menunggu jawaban
@@ -237,7 +255,7 @@ async function kirimSemua() {
   simpanLokal("antre", antre); gambar(); sambungan();
 }
 /* Tombol manual: tanpa jeda, karena pengguna sedang menunggu di depan layar. */
-$("#kirim").onclick = () => { batalkanJadwal(); kirimSemua(); };
+$("#kirim").onclick = () => { batalkanJadwal(); kirimSemua(true); };
 addEventListener("online", () => kirimNanti(30));
 addEventListener("offline", () => { batalkanJadwal(); sambungan(); });
 
