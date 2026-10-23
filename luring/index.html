@@ -47,6 +47,7 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted);font-weight:600
   <form class="card" id="frm">
     <h2>Catatan hasil pengawasan</h2>
     <label>Kecamatan <select id="Kecamatan" required></select></label>
+    <p class="muted" style="margin:-6px 0 10px">Bila Anda terdaftar pada satu kecamatan, SIMAPAN memakai kecamatan itu, bukan pilihan di atas.</p>
     <label>Jenis dokumen <select id="Jenis_Dokumen" required></select></label>
     <label>Nomor dokumen <input id="No_Dokumen" placeholder="mis. PW.02/2026/0123"></label>
     <label>Tanggal <input id="Tanggal" type="date" required></label>
@@ -71,9 +72,9 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted);font-weight:600
 
   <details class="card">
     <summary>Pengaturan sambungan</summary>
-    <p class="muted">Diisi sekali oleh Tim Teknis Aplikasi. Minta alamat dan token kepada Admin SIMAPAN.</p>
+    <p class="muted">Diisi sekali. Alamat diberikan Admin SIMAPAN. <b>Kode luring berbeda untuk setiap orang</b> &mdash; jangan dipakai bersama atau dibagikan, karena catatan yang dikirim tercatat atas nama pemilik kode.</p>
     <label>Alamat web app (…/exec) <input id="url" type="url" placeholder="https://script.google.com/macros/s/.../exec"></label>
-    <label>Token <input id="token" placeholder="token dari Admin"></label>
+    <label>Kode luring <input id="token" placeholder="mis. ABCD-EFGH" autocapitalize="characters" autocomplete="off" spellcheck="false"></label>
     <label>Email Anda <input id="email" type="email" placeholder="nama@contoh.id"></label>
     <button class="btn" id="simpanSet">Simpan pengaturan</button>
   </details>
@@ -217,8 +218,11 @@ async function kirimSemua() {
       if (j.ok) { a.status = "kirim"; a.pesan = ""; delete a.data.base64; }
       else {
         a.status = "gagal";
+        /* Kesalahan menetap (kode salah, jenis dokumen kosong) tidak akan berubah
+           hasilnya betapa pun dicoba lagi, jadi percobaan otomatis dihentikan. */
+        if (j.tetap) a.coba = MAKS_COBA;
         a.pesan = (j.pesan || "ditolak peladen")
-          + (a.coba < MAKS_COBA ? " \u2014 akan dicoba lagi sendiri (percobaan ke-" + a.coba + ")" : " \u2014 ketuk Kirim sekarang atau laporkan ke Admin");
+          + (j.tetap ? "" : (a.coba < MAKS_COBA ? " \u2014 akan dicoba lagi sendiri (percobaan ke-" + a.coba + ")" : " \u2014 ketuk Kirim sekarang atau laporkan ke Admin"));
       }
     } catch (err) {
       a.status = "gagal";
