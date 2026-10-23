@@ -80,16 +80,43 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted);font-weight:600
   </details>
 </main>
 <script>
-const KEC = ["Amandraya","Aramo","Boronadu","Fanayama","Gomo","Hibala","Hilimegai","Hilisalawa'ahe","Huruna","Idanotae","Lahusa","Lolomatua","Lolowau","Luahagundre Maniamolo","Maniamolo","Mazino","Mazo","O'o'u","Onohazumba","Onolalu","Pulau-Pulau Batu","Pulau-Pulau Batu Barat","Pulau-Pulau Batu Timur","Pulau-Pulau Batu Utara","Sidua'ori","Simuk","Somambawa","Susua","Tanah Masa","Teluk Dalam","Toma","Ulu Idanotae","Ulunoyo","Ulususua","Umbunasi"];
-const JENIS = ["Laporan Hasil Pengawasan (Form A)","Surat Tugas Pengawasan","Surat Imbauan / Saran Perbaikan","Dokumentasi Pengawasan (foto/video)","Laporan Akhir Pengawasan Tahapan"];
-const TAHAPAN = {Pemilu:["Pemutakhiran Data Pemilih","Verifikasi Partai Politik","Pencalonan Anggota DPRD","Kampanye","Masa Tenang","Pemungutan dan Penghitungan Suara","Rekapitulasi Hasil","Penetapan Hasil"],
+const KEC_BAWAAN = ["Amandraya","Aramo","Boronadu","Fanayama","Gomo","Hibala","Hilimegai","Hilisalawa'ahe","Huruna","Idanotae","Lahusa","Lolomatua","Lolowau","Luahagundre Maniamolo","Maniamolo","Mazino","Mazo","O'o'u","Onohazumba","Onolalu","Pulau-Pulau Batu","Pulau-Pulau Batu Barat","Pulau-Pulau Batu Timur","Pulau-Pulau Batu Utara","Sidua'ori","Simuk","Somambawa","Susua","Tanah Masa","Teluk Dalam","Toma","Ulu Idanotae","Ulunoyo","Ulususua","Umbunasi"];
+const JENIS_BAWAAN = ["Laporan Hasil Pengawasan (Form A)","Surat Tugas Pengawasan","Surat Imbauan / Saran Perbaikan","Dokumentasi Pengawasan (foto/video)","Laporan Akhir Pengawasan Tahapan"];
+const TAHAPAN_BAWAAN = {Pemilu:["Pemutakhiran Data Pemilih","Verifikasi Partai Politik","Pencalonan Anggota DPRD","Kampanye","Masa Tenang","Pemungutan dan Penghitungan Suara","Rekapitulasi Hasil","Penetapan Hasil"],
   Pemilihan:["Pembentukan Badan Ad Hoc","Pemutakhiran Data Pemilih","Pencalonan Bupati dan Wakil Bupati","Kampanye","Masa Tenang","Pemungutan dan Penghitungan Suara","Rekapitulasi Hasil","Penetapan Pasangan Calon Terpilih"]};
 const $ = s => document.querySelector(s);
 const simpanLokal = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 const bacaLokal = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } };
-const isi = (el, arr) => el.innerHTML = arr.map(x => `<option>${x}</option>`).join("");
-isi($("#Kecamatan"), KEC); isi($("#Jenis_Dokumen"), JENIS); isi($("#Tahapan"), TAHAPAN.Pemilu);
-$("#Rezim").onchange = e => isi($("#Tahapan"), TAHAPAN[e.target.value]);
+const isi = (el, arr) => el.innerHTML = (arr || []).map(x => `<option>${x}</option>`).join("");
+
+/* Daftar rujukan: tiga lapis.
+   1. REF tersimpan, diambil dari peladen saat ada sinyal
+   2. bila belum pernah tersimpan, daftar bawaan yang tertanam di halaman ini
+   Dengan begitu daftar di HP mengikuti tab REF_* di spreadsheet, tetapi
+   aplikasi tetap dapat dipakai di tempat tanpa sinyal. */
+let REF = bacaLokal("ref", null);
+const adaIsi = a => Array.isArray(a) && a.length > 0;
+const refKec = () => adaIsi(REF && REF.kecamatan) ? REF.kecamatan : KEC_BAWAAN;
+const refJenis = () => adaIsi(REF && REF.jenis) ? REF.jenis : JENIS_BAWAAN;
+const refTahapan = rz => {
+  const dari = REF && REF.tahapan && adaIsi(REF.tahapan[rz]) ? REF.tahapan[rz] : TAHAPAN_BAWAAN[rz];
+  return dari || [];
+};
+
+/* Mengisi ulang ketiga pilihan tanpa menghilangkan yang sedang dipilih,
+   selama pilihan itu masih ada pada daftar yang baru. */
+function isiSemua() {
+  const simpanPilihan = (el, arr) => {
+    const lama = el.value;
+    isi(el, arr);
+    if (lama && arr.indexOf(lama) >= 0) el.value = lama;
+  };
+  simpanPilihan($("#Kecamatan"), refKec());
+  simpanPilihan($("#Jenis_Dokumen"), refJenis());
+  simpanPilihan($("#Tahapan"), refTahapan($("#Rezim").value || "Pemilu"));
+}
+isiSemua();
+$("#Rezim").onchange = e => isi($("#Tahapan"), refTahapan(e.target.value));
 $("#Tanggal").value = new Date().toISOString().slice(0, 10);
 const set = bacaLokal("set", {});
 ["url", "token", "email"].forEach(k => $("#" + k).value = set[k] || "");
@@ -108,6 +135,7 @@ $("#simpanSet").onclick = e => {
   });
   if (pulih) { simpanLokal("antre", antre); gambar(); }
   pesan(pulih ? "Pengaturan disimpan. " + pulih + " catatan akan dicoba lagi." : "Pengaturan disimpan.");
+  ambilRujukan(true);
   kirimNanti(5);
 };
 
@@ -192,6 +220,32 @@ function sambungan() {
     : jeda ? sisa + " catatan menunggu \u2014 terkirim sendiri dalam \u00b1" + jeda + " detik"
     : sisa + " catatan menunggu dikirim";
 }
+/* Mengambil daftar rujukan terbaru. Sekali sehari sudah cukup: daftar tahapan
+   dan kecamatan jarang berubah, dan setiap permintaan memakai kuota peladen. */
+const SEHARI = 864e5;
+let sedangAmbilRef = false;
+async function ambilRujukan(paksa) {
+  if (sedangAmbilRef || !navigator.onLine) return;
+  const st = bacaLokal("set", {});
+  if (!st.url || !st.token) return;
+  const umur = REF && REF.diambil ? Date.now() - REF.diambil : Infinity;
+  if (!paksa && umur < SEHARI) return;
+  sedangAmbilRef = true;
+  try {
+    const res = await fetch(st.url, {
+      method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ token: st.token, minta: "ref" })
+    });
+    const j = await res.json();
+    if (j && j.ok && j.ref) {
+      REF = j.ref; REF.diambil = Date.now();
+      simpanLokal("ref", REF);
+      isiSemua();
+    }
+  } catch (e) { /* tanpa sinyal atau peladen sibuk: daftar tersimpan tetap dipakai */ }
+  finally { sedangAmbilRef = false; }
+}
+
 let sedangKirim = false;
 let jadwal = null, jadwalPada = 0;
 const MAKS_COBA = 12;   // setelah ini kiriman berhenti dicoba sendiri; tombol Kirim sekarang tetap bisa
@@ -256,7 +310,7 @@ async function kirimSemua(manual) {
 }
 /* Tombol manual: tanpa jeda, karena pengguna sedang menunggu di depan layar. */
 $("#kirim").onclick = () => { batalkanJadwal(); kirimSemua(true); };
-addEventListener("online", () => kirimNanti(30));
+addEventListener("online", () => { ambilRujukan(); kirimNanti(30); });
 addEventListener("offline", () => { batalkanJadwal(); sambungan(); });
 
 /* Percobaan ulang berkala: kiriman yang gagal dicoba lagi sendiri setiap tiga menit
@@ -275,7 +329,7 @@ addEventListener("visibilitychange", () => {
 });
 
 const dimuatPada = Date.now();
-gambar(); kirimNanti(30); sambungan();
+gambar(); kirimNanti(30); sambungan(); ambilRujukan();
 setInterval(sambungan, 5000);   // hitungan mundur pada baris status tetap hidup
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
