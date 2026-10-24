@@ -60,10 +60,11 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted);font-weight:600
     <label>Hasil pengawasan <select id="Hasil_Pengawasan">
       <option>Tidak ditemukan dugaan pelanggaran</option><option>Ditemukan dugaan pelanggaran</option><option>Saran perbaikan disampaikan</option></select></label>
     <label>Uraian singkat <textarea id="Uraian" placeholder="Apa yang diawasi, di mana, dan apa yang ditemukan"></textarea></label>
-    <label>Lampiran &mdash; foto atau berkas PDF <input id="Foto" type="file" accept="application/pdf,image/*"></label>
+    <label>Lampiran &mdash; foto atau berkas PDF <b style="color:var(--crit)">(wajib)</b> <input id="Foto" type="file" accept="application/pdf,image/*" required></label>
     <p class="muted" id="namaBerkas" style="margin:-4px 0 10px;font-size:12.5px"></p>
     <img class="pratinjau" id="pratinjau" hidden alt="Pratinjau lampiran">
-    <button class="btn primary" type="submit">Simpan catatan</button>
+    <p class="muted" id="wajibFoto" style="margin:-4px 0 10px;font-size:12.5px;color:var(--crit)">Foto atau PDF wajib dilampirkan. Tombol di bawah terbuka setelah lampiran dipilih.</p>
+    <button class="btn primary" type="submit" id="simpanCatatan" disabled>Simpan catatan</button>
     <p class="muted" style="margin:10px 0 0">Catatan disimpan di HP ini dulu, lalu terkirim sendiri ke SIMAPAN begitu ada sinyal.</p>
   </form>
 
@@ -157,7 +158,15 @@ function bacaBerkas(file) {
     fr.readAsDataURL(file);
   });
 }
-function lepasLampiran(inp) { foto = null; inp.value = ""; $("#pratinjau").hidden = true; $("#namaBerkas").textContent = ""; }
+/* Tombol simpan terkunci selama belum ada lampiran. Catatan pengawasan tanpa
+   foto atau pindaian tidak dapat diverifikasi, jadi lebih baik dicegah sejak di
+   lapangan daripada menumpuk sebagai draf yang tidak bisa maju. */
+function perbaruiTombolSimpan() {
+  const t = $("#simpanCatatan"), p = $("#wajibFoto");
+  if (t) t.disabled = !foto;
+  if (p) p.hidden = !!foto;
+}
+function lepasLampiran(inp) { foto = null; inp.value = ""; $("#pratinjau").hidden = true; $("#namaBerkas").textContent = ""; perbaruiTombolSimpan(); }
 $("#Foto").onchange = async e => {
   const inp = e.target, f = inp.files[0];
   $("#namaBerkas").textContent = "";
@@ -170,11 +179,13 @@ $("#Foto").onchange = async e => {
     foto = await bacaBerkas(f);
     $("#pratinjau").hidden = true;
     $("#namaBerkas").textContent = "Terlampir: " + f.name + " \u00b7 " + ukuranTeks(f.size);
+    perbaruiTombolSimpan();
     return;
   }
   foto = await kecilkan(f);
   $("#pratinjau").src = foto.dataUrl; $("#pratinjau").hidden = false;
   $("#namaBerkas").textContent = "Foto " + ukuranTeks(f.size) + " dikecilkan menjadi " + ukuranTeks(Math.round(foto.base64.length * 3 / 4));
+  perbaruiTombolSimpan();
 };
 function kecilkan(file) { // perkecil foto agar hemat kuota dan cepat terkirim
   return new Promise(ok => {
@@ -190,12 +201,14 @@ function kecilkan(file) { // perkecil foto agar hemat kuota dan cepat terkirim
   });
 }
 let sedangSimpan = false;
+perbaruiTombolSimpan();
 const jejakBaru = () => "L" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 $("#frm").onsubmit = e => {
   e.preventDefault();
   if (sedangSimpan) return;
   sedangSimpan = true;
   setTimeout(() => { sedangSimpan = false; }, 1500);
+  if (!foto) { sedangSimpan = false; pesan("Lampirkan foto atau berkas PDF terlebih dahulu."); return; }
   const d = {};
   ["Kecamatan", "Jenis_Dokumen", "No_Dokumen", "Tanggal", "Rezim", "Tahapan", "Pengawas", "Hasil_Pengawasan", "Uraian"].forEach(k => d[k] = $("#" + k).value.trim());
   d.Email = (bacaLokal("set", {}).email) || "";
@@ -203,6 +216,7 @@ $("#frm").onsubmit = e => {
   antre.push({ id: Date.now(), jejak: jejakBaru(), data: d, status: "antre", pesan: "" });
   simpanLokal("antre", antre); simpanLokal("kec", d.Kecamatan);
   $("#Uraian").value = ""; $("#No_Dokumen").value = ""; $("#Foto").value = ""; $("#pratinjau").hidden = true; $("#namaBerkas").textContent = ""; foto = null;
+  perbaruiTombolSimpan();
   gambar(); pesan("Catatan masuk antrean."); kirimNanti(5);
 };
 function gambar() {
