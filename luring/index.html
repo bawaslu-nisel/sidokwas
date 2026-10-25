@@ -103,6 +103,21 @@ let REF = bacaLokal("ref", null);
 const adaIsi = a => Array.isArray(a) && a.length > 0;
 const refKec = () => adaIsi(REF && REF.kecamatan) ? REF.kecamatan : KEC_BAWAAN;
 const refJenis = () => adaIsi(REF && REF.jenis) ? REF.jenis : JENIS_BAWAAN;
+/* Petunjuk bentuk nomor surat, mengikuti pola Bawaslu:
+   urut / klasifikasi / kode penerbit / bulan / tahun.
+   Hanya petunjuk pada kolom isian, tidak mengisi apa pun dengan sendirinya. */
+function petunjukNomor() {
+  const inp = $("#No_Dokumen");
+  if (!inp) return;
+  const klas = (REF && REF.klasifikasi && REF.klasifikasi[$("#Jenis_Dokumen").value]) || "";
+  const kec = $("#Kecamatan").value;
+  const kk = (REF && REF.kodeKec && REF.kodeKec[kec]) || "";
+  const inst = (REF && REF.instansi) || "";
+  const penerbit = kk ? (inst ? (kk.indexOf(inst) === 0 ? kk : inst + "." + kk) : kk) : inst;
+  const tgl = $("#Tanggal").value || new Date().toISOString().slice(0, 10);
+  if (!klas && !penerbit) { inp.placeholder = "nomor surat keluar"; return; }
+  inp.placeholder = "001/" + (klas || "...") + (penerbit ? "/" + penerbit : "") + "/" + tgl.slice(5, 7) + "/" + tgl.slice(0, 4);
+}
 const refTahapan = rz => {
   const dari = REF && REF.tahapan && adaIsi(REF.tahapan[rz]) ? REF.tahapan[rz] : TAHAPAN_BAWAAN[rz];
   return dari || [];
@@ -119,10 +134,13 @@ function isiSemua() {
   simpanPilihan($("#Kecamatan"), refKec());
   simpanPilihan($("#Jenis_Dokumen"), refJenis());
   simpanPilihan($("#Tahapan"), refTahapan($("#Rezim").value || "Pemilu"));
+  petunjukNomor();
 }
 isiSemua();
 $("#Rezim").onchange = e => isi($("#Tahapan"), refTahapan(e.target.value));
 $("#Tanggal").value = new Date().toISOString().slice(0, 10);
+["Jenis_Dokumen", "Kecamatan", "Tanggal"].forEach(k => $("#" + k).addEventListener("change", petunjukNomor));
+petunjukNomor();
 const set = bacaLokal("set", {});
 ["url", "token", "email"].forEach(k => $("#" + k).value = set[k] || "");
 const kec = bacaLokal("kec", ""); if (kec) $("#Kecamatan").value = kec;
