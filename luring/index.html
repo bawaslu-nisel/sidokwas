@@ -40,6 +40,13 @@ textarea{min-height:64px;resize:vertical}
 .muted{color:var(--muted);font-size:12.5px}
 img.pratinjau{max-width:100%;border-radius:8px;margin-top:6px}
 details summary{cursor:pointer;font-size:13px;color:var(--muted);font-weight:600}
+/* kotak kode luring disamarkan seperti kotak kata sandi */
+.sandi{position:relative;display:flex}
+.sandi input{flex:1;padding-right:40px;letter-spacing:.16em}
+.sandi button{position:absolute;right:3px;top:50%;transform:translateY(-50%);width:32px;height:32px;
+  display:grid;place-items:center;border:0;border-radius:7px;background:none;color:var(--muted);cursor:pointer}
+.sandi button svg{width:18px;height:18px}
+.sandi button[aria-pressed="true"]{color:var(--accent)}
 </style>
 </head>
 <body>
@@ -78,7 +85,11 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted);font-weight:600
     <summary>Pengaturan sambungan</summary>
     <p class="muted">Diisi sekali. Alamat diberikan Admin SIMAPAN. <b>Kode luring berbeda untuk setiap orang</b> &mdash; jangan dipakai bersama atau dibagikan, karena catatan yang dikirim tercatat atas nama pemilik kode.</p>
     <label>Alamat web app (…/exec) <input id="url" type="url" placeholder="https://script.google.com/macros/s/.../exec"></label>
-    <label>Kode luring <input id="token" placeholder="mis. ABCD-EFGH" autocapitalize="characters" autocomplete="off" spellcheck="false"></label>
+    <label>Kode luring
+      <span class="sandi"><input id="token" type="password" placeholder="mis. ABCD-EFGH" autocapitalize="characters" autocomplete="off" spellcheck="false">
+      <button type="button" id="lihatToken" aria-label="Tampilkan kode luring" aria-pressed="false" title="Tampilkan kode luring">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.8"/></svg>
+      </button></span></label>
     <label>Email Anda <input id="email" type="email" placeholder="nama@contoh.id"></label>
     <button class="btn" id="simpanSet">Simpan pengaturan</button>
   </details>
@@ -143,6 +154,17 @@ $("#Tanggal").value = new Date().toISOString().slice(0, 10);
 petunjukNomor();
 const set = bacaLokal("set", {});
 ["url", "token", "email"].forEach(k => $("#" + k).value = set[k] || "");
+/* Kode luring diperlakukan seperti kata sandi: tersamar sejak awal supaya
+   tidak terbaca orang lain yang kebetulan melihat layar, dan hanya terbuka
+   saat pemiliknya sendiri menekan ikon mata. */
+$("#lihatToken").onclick = () => {
+  const inp = $("#token"), buka = inp.type === "password";
+  inp.type = buka ? "text" : "password";
+  const judul = buka ? "Sembunyikan kode luring" : "Tampilkan kode luring";
+  $("#lihatToken").setAttribute("aria-pressed", buka ? "true" : "false");
+  $("#lihatToken").setAttribute("aria-label", judul);
+  $("#lihatToken").title = judul;
+};
 const kec = bacaLokal("kec", ""); if (kec) $("#Kecamatan").value = kec;
 $("#simpanSet").onclick = e => {
   e.preventDefault();
