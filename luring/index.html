@@ -47,17 +47,22 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted);font-weight:600
   display:grid;place-items:center;border:0;border-radius:7px;background:none;color:var(--muted);cursor:pointer}
 .sandi button svg{width:18px;height:18px}
 .sandi button[aria-pressed="true"]{color:var(--accent)}
+.pemilik{font-size:12.5px;line-height:1.45;padding:9px 12px;border-radius:9px;
+  background:color-mix(in srgb,var(--accent) 10%,transparent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent)}
+.pemilik b{color:var(--ink)}
+.pemilik span{color:var(--muted);display:block}
 </style>
 </head>
 <body>
 <header><b>SIMAPAN · Input Luring</b><span>Pengawasan Pemilu — Bawaslu Kab. Nias Selatan</span></header>
 <main>
   <div class="status" id="status"><span class="dot"></span><span id="statusTeks">Memeriksa sambungan…</span></div>
+  <div class="pemilik" id="pemilik" hidden></div>
 
   <form class="card" id="frm">
     <h2>Catatan hasil pengawasan</h2>
     <label>Kecamatan <select id="Kecamatan" required></select></label>
-    <p class="muted" style="margin:-6px 0 10px">Bila Anda terdaftar pada satu kecamatan, SIMAPAN memakai kecamatan itu, bukan pilihan di atas.</p>
+    <p class="muted" id="catatanKec" style="margin:-6px 0 10px">Bila Anda terdaftar pada satu kecamatan, SIMAPAN memakai kecamatan itu, bukan pilihan di atas.</p>
     <label>Jenis dokumen <select id="Jenis_Dokumen" required></select></label>
     <label>Nomor dokumen <input id="No_Dokumen" placeholder="mis. PW.02/2026/0123"></label>
     <label>Tanggal <input id="Tanggal" type="date" required></label>
@@ -145,7 +150,38 @@ function isiSemua() {
   simpanPilihan($("#Kecamatan"), refKec());
   simpanPilihan($("#Jenis_Dokumen"), refJenis());
   simpanPilihan($("#Tahapan"), refTahapan($("#Rezim").value || "Pemilu"));
+  terapkanKunciKecamatan();
   petunjukNomor();
+}
+
+/* Peladen memberi tahu apakah pemegang kode ini terikat pada satu kecamatan.
+   Bila ya, daftar pilihan hanya berisi kecamatan itu, dan keterangannya
+   diganti supaya tidak ada lagi pilihan semu di layar. Peladen tetap menjadi
+   penentu terakhir: kiriman yang kecamatannya keliru dibetulkan di sana,
+   bukan di sini. */
+function terapkanKunciKecamatan() {
+  const sel = $("#Kecamatan"), ket = $("#catatanKec"), bar = $("#pemilik");
+  const kunci = !!(REF && REF.kunciKecamatan && REF.kecamatanSaya);
+  if (kunci) {
+    sel.value = REF.kecamatanSaya;
+    sel.setAttribute("aria-readonly", "true");
+    ket.innerHTML = "Kecamatan ditetapkan Admin SIMAPAN mengikuti wilayah kerja Anda dan tidak dapat diubah dari sini.";
+  } else {
+    sel.removeAttribute("aria-readonly");
+    ket.innerHTML = REF && REF.pemilik
+      ? "Anda tidak terikat pada satu kecamatan, jadi pilihan di atas yang dipakai. Pilihan Anda tercatat beserta nama Anda."
+      : "Bila Anda terdaftar pada satu kecamatan, SIMAPAN memakai kecamatan itu, bukan pilihan di atas.";
+  }
+  /* Nama pemilik kode ditampilkan terus-menerus. Bila sebuah kode dipakai
+     bersama-sama, nama orang lain yang muncul di layar sendiri adalah cara
+     tercepat pemakainya menyadarinya. */
+  if (REF && REF.pemilik) {
+    bar.hidden = false;
+    bar.innerHTML = "Kode luring ini terdaftar atas nama <b>" + REF.pemilik + "</b>"
+      + (REF.peran ? " (" + REF.peran + ")" : "")
+      + (REF.kecamatanSaya ? ", Kecamatan " + REF.kecamatanSaya : "") + "."
+      + "<span>Bukan Anda? Jangan dipakai \u2014 setiap catatan tercatat atas nama pemilik kode. Hubungi Admin SIMAPAN.</span>";
+  } else { bar.hidden = true; }
 }
 isiSemua();
 $("#Rezim").onchange = e => isi($("#Tahapan"), refTahapan(e.target.value));
@@ -165,7 +201,7 @@ $("#lihatToken").onclick = () => {
   $("#lihatToken").setAttribute("aria-label", judul);
   $("#lihatToken").title = judul;
 };
-const kec = bacaLokal("kec", ""); if (kec) $("#Kecamatan").value = kec;
+const kec = bacaLokal("kec", ""); if (kec && !(REF && REF.kunciKecamatan)) $("#Kecamatan").value = kec;
 $("#simpanSet").onclick = e => {
   e.preventDefault();
   simpanLokal("set", { url: $("#url").value.trim(), token: $("#token").value.trim(), email: $("#email").value.trim() });
